@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import create_access_token
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import db
 from models.user import User
@@ -19,11 +21,15 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "email already registered"}), 409
 
-    # TODO: replace with a proper password hash (e.g., werkzeug or bcrypt)
-    user = User(name=name, email=email, password_hash=password)
+    user = User(
+        name=name,
+        email=email,
+        password_hash=generate_password_hash(password),
+    )
     db.session.add(user)
     db.session.commit()
-    return jsonify(user.to_dict()), 201
+    token = create_access_token(identity=str(user.id))
+    return jsonify({"user": user.to_dict(), "token": token}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -33,8 +39,8 @@ def login():
     password = data.get("password")
 
     user = User.query.filter_by(email=email).first()
-    if not user or user.password_hash != password:
+    if not user or not check_password_hash(user.password_hash, password):
         return jsonify({"error": "invalid credentials"}), 401
 
-    # TODO: return a JWT token
-    return jsonify({"user": user.to_dict(), "token": "stub-token"})
+    token = create_access_token(identity=str(user.id))
+    return jsonify({"user": user.to_dict(), "token": token})

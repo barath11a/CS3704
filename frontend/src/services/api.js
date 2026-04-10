@@ -1,8 +1,19 @@
 import axios from "axios";
 
+export const AUTH_TOKEN_KEY = "iges_token";
+export const AUTH_USER_KEY = "iges_user";
+
 const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const authApi = {
@@ -12,7 +23,8 @@ export const authApi = {
 };
 
 export const groupApi = {
-  create: (name, ownerId) => api.post("/groups", { name, owner_id: ownerId }),
+  list: () => api.get("/groups"),
+  create: (name) => api.post("/groups", { name }),
   get: (id) => api.get(`/groups/${id}`),
   addMember: (groupId, userId) =>
     api.post(`/groups/${groupId}/members`, { user_id: userId }),
