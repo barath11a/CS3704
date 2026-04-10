@@ -54,7 +54,7 @@ def scan_receipt():
 def list_group_expenses(group_id):
     items = Expense.query.filter_by(group_id=group_id).all()
     return jsonify([e.to_dict() for e in items])
-
+#fixed routing for the GET method
 @expenses_bp.route("/", methods=["GET"])
 def get_all_expenses():
     items = Expense.query.all()
