@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import or_
 
 from models import db
 from models.group import Group, GroupMember
@@ -6,14 +8,30 @@ from models.group import Group, GroupMember
 groups_bp = Blueprint("groups", __name__)
 
 
+@groups_bp.route("", methods=["GET"])
+@jwt_required()
+def list_groups():
+    user_id = int(get_jwt_identity())
+    member_subq = db.session.query(GroupMember.group_id).filter_by(user_id=user_id)
+    groups = (
+        Group.query.filter(
+            or_(Group.owner_id == user_id, Group.id.in_(member_subq))
+        )
+        .order_by(Group.created_at.desc())
+        .all()
+    )
+    return jsonify([g.to_dict() for g in groups])
+
+
 @groups_bp.route("", methods=["POST"])
+@jwt_required()
 def create_group():
     data = request.get_json() or {}
     name = data.get("name")
-    owner_id = data.get("owner_id")
+    owner_id = int(get_jwt_identity())
 
-    if not (name and owner_id):
-        return jsonify({"error": "name and owner_id required"}), 400
+    if not name:
+        return jsonify({"error": "name required"}), 400
 
     group = Group(name=name, owner_id=owner_id)
     db.session.add(group)
