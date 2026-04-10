@@ -8,7 +8,7 @@ from services.ocr_service import extract_receipt_total
 expenses_bp = Blueprint("expenses", __name__)
 
 
-@expenses_bp.route("", methods=["POST"])
+@expenses_bp.route("/", methods=["POST"])
 def add_expense():
     data = request.get_json() or {}
     group_id = data.get("group_id")
@@ -53,4 +53,9 @@ def scan_receipt():
 @expenses_bp.route("/group/<int:group_id>", methods=["GET"])
 def list_group_expenses(group_id):
     items = Expense.query.filter_by(group_id=group_id).all()
+    return jsonify([e.to_dict() for e in items])
+#fixed routing for the GET method
+@expenses_bp.route("/", methods=["GET"])
+def get_all_expenses():
+    items = Expense.query.all()
     return jsonify([e.to_dict() for e in items])
