@@ -19,8 +19,12 @@ def add_expense():
     participants = data.get("participants", [])  # list of user_ids
     custom_shares = data.get("custom_shares")    # {user_id: amount}
 
-    if not (group_id and payer_id and description and amount and participants):
+
+    if group_id is None or payer_id is None or description is None or amount is None:
         return jsonify({"error": "missing required fields"}), 400
+
+    if not isinstance(participants, list) or len(participants) == 0:
+        return jsonify({"error": "participants must be a non-empty list"}), 400
 
     shares = compute_split(amount, participants, split_method, custom_shares)
 
