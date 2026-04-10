@@ -42,4 +42,8 @@ export const expenseApi = {
   },
 };
 
+export const reminderApi = {
+  list: () => api.get("/reminders"),
+};
+
 export default api;
