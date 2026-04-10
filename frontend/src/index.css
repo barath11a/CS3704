@@ -14,3 +14,90 @@ body {
 button {
   cursor: pointer;
 }
+
+.reminders-banner {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e2e5eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.reminders-heading {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.reminders-sub {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  color: #5c6470;
+}
+
+.reminders-muted {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #5c6470;
+}
+
+.reminders-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reminder-card {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.reminder-owe {
+  background: #fffbf0;
+  border-color: #f0e0c0;
+}
+
+.reminder-credit {
+  background: #f4fbf6;
+  border-color: #c8e6d4;
+}
+
+.reminder-message {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.reminder-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.reminder-actions a {
+  color: #1a5f4a;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.reminder-actions a:hover {
+  text-decoration: underline;
+}
+
+.reminder-actions button {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border: 1px solid #c5cad3;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.reminder-actions button:hover {
+  background: #f3f4f6;
+}

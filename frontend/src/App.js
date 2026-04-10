@@ -3,6 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom"
 import Dashboard from "./pages/Dashboard";
 import GroupView from "./pages/GroupView";
 import Login from "./pages/Login";
+import RemindersBanner from "./components/RemindersBanner";
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "./services/api";
 
 function NavAuth() {
@@ -55,6 +56,7 @@ function App() {
           <NavAuth />
         </nav>
       </header>
+      <RemindersBanner />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
