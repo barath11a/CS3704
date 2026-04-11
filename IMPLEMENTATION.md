@@ -80,7 +80,22 @@ How it related to overall design
 
 This supports the PM3 goal of real-time balance visibility for group members. Showing whether a user is owed money, owes money, or is settled up directly strengthens the core shared-expense workflow and makes the group page more aligned with the main purpose of the application.
 
+Contributor: Harin Kellampalli
 
+What was implemented:
+I added a "last updated" timestamp to each group and expense. This allows users to see when a group or expense was last modified, improving transparency and tracking of recent activity. The timestamp is displayed in the group and expense details views, and is automatically updated in the backend whenever a relevant record is changed.
+
+AI Tool Used: GitHub Copilot
+
+Prompt:
+"Add a last updated timestamp to each group and expense, update it automatically on modification, and display it in the details view."
+
+AI Explanation and Modification:
+Copilot generated the necessary SQLAlchemy model changes to add a `last_updated` field with automatic updates on modification. It also suggested updating the relevant API endpoints and frontend components to include and display the new timestamp. I reviewed and adjusted the code to ensure the timestamp updates correctly on all relevant changes and is formatted for user readability in the UI.
+
+How it related to overall design
+
+This feature supports the application's goal of transparency and real-time collaboration. By surfacing the last updated time, users can better track recent changes and activity within their groups and expenses, aligning with the PM3 design focus on clear, up-to-date information for all group members.
 
 
 
