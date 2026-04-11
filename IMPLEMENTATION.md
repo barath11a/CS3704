@@ -45,6 +45,24 @@ How it related to overall design
 This aligns perfectly with the automated gentle reminders and real-time balances listed as core capabilities in our PM3 architecture. Without secure JWT fetches and live math computation, the application would fail to serve its main purpose.
 
 
+Contributor: Haradeep Puneti
+
+What was implemented:
+I replaced plaintext password storage with Werkzeug hashing and issued real JWTs on register and login using Flask-JWT-Extended. I added a JWT-protected GET endpoint for listing groups the user owns or belongs to and updated group creation so the owner comes from the token and the request body only needs a name. On the frontend I wired login and register, attached the Bearer token with an Axios interceptor, and built out the dashboard to load and create groups with logout and in-tab auth sync.
+
+AI Tool Used: Cursor (AI assistant)
+
+Prompt: "Go through this codebase, find a feature to build out and fix, don't make it too complicated for now."
+"How should I name this branch and summarize it for a PR?"
+
+AI Explanation and Modification:
+The assistant proposed securing auth and connecting the dashboard to real APIs. I adapted the suggestions to our stack: a centralized JWT manager in a small extensions module to avoid circular imports, SQLAlchemy queries for my groups (owner or group member rows), and small frontend patterns (browser storage keys and a custom auth-change event for logout on the same route) so the UI stayed consistent with React Router.
+
+How it related to overall design
+
+This supports the PM3 security and web-first goals: hashed passwords and JWT auth match our non-functional security requirements, and listing or creating groups from an authenticated session is the backbone for group-based expense flows and future balance and reminder features.
+
+
 
 
 
