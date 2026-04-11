@@ -63,6 +63,24 @@ How it related to overall design
 This supports the PM3 security and web-first goals: hashed passwords and JWT auth match our non-functional security requirements, and listing or creating groups from an authenticated session is the backbone for group-based expense flows and future balance and reminder features.
 
 
+Contributor: Amanjeet Sahagal
+
+What was implemented:
+I implemented the net balance summary on the group details page. The placeholder group view was replaced with a functional screen that loads the selected group, fetches its expenses, and shows the signed-in user's net balance along with the group name, member count, and expense count.
+
+AI Tool Used: Codex
+
+Prompt: "do net balance"
+"push it with good title"
+
+AI Explanation and Modification:
+Codex helped identify a clean feature that fit the existing codebase and then wired the frontend to use the existing group and expense APIs. I reviewed the implementation and kept the feature minimal by calculating net balance on the client side from `payer_id` and `shares`, using the authenticated user already stored in local storage, instead of expanding backend scope.
+
+How it related to overall design
+
+This supports the PM3 goal of real-time balance visibility for group members. Showing whether a user is owed money, owes money, or is settled up directly strengthens the core shared-expense workflow and makes the group page more aligned with the main purpose of the application.
+
+
 
 
 
