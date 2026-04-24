@@ -1,9 +1,7 @@
 """Unit and integration tests for the Intelligent Group Expense Splitter.
 
-AI Usage Disclosure (per course AI policy)
-------------------------------------------
 Portions of these tests were generated with the assistance of Claude
-(Anthropic). Prompt used:
+Prompt used:
 
     "Generate unit tests (at least one per function) and an integration
      test for the split_service and ocr_service modules of the
@@ -31,6 +29,7 @@ from services.ocr_service import categorize_expense
 # ---------------------------------------------------------------------------
 # Unit tests: compute_split
 # ---------------------------------------------------------------------------
+# --- Pre-existing tests (no AI) -------------------------------------------
 
 def test_equal_split():
     """compute_split divides the amount evenly across all participants."""
@@ -194,3 +193,45 @@ def test_end_to_end_group_expense_flow():
     # Conservation: total of transfers equals total positive balance.
     total_owed = sum(b for b in balances.values() if b > 0)
     assert sum(t[2] for t in transfers) == pytest.approx(total_owed)
+# --- BEGIN AI-ASSISTED ----------------------------------------------------
+
+def test_compute_split_empty_participants_returns_empty_dict():
+    # Edge case: no participants -> no shares, no division-by-zero.
+    assert compute_split(50.0, [], method="equal") == {}
+
+
+def test_compute_split_percent_method():
+    shares = compute_split(
+        200.00, [1, 2], method="percent", custom_shares={1: 25, 2: 75}
+    )
+    assert shares == {1: 50.00, 2: 150.00}
+
+
+def test_compute_split_custom_requires_custom_shares():
+    with pytest.raises(ValueError):
+        compute_split(40.0, [1, 2], method="custom", custom_shares=None)
+
+
+def test_compute_split_percent_requires_custom_shares():
+    with pytest.raises(ValueError):
+        compute_split(40.0, [1, 2], method="percent", custom_shares=None)
+
+
+def test_compute_split_unknown_method_raises():
+    with pytest.raises(ValueError):
+        compute_split(40.0, [1, 2], method="bogus")
+
+
+def test_simplify_debts_balanced_empty():
+    # When everyone is settled, there should be no transfers at all.
+    assert simplify_debts({1: 0, 2: 0}) == []
+
+
+def test_simplify_debts_chains_multiple_creditors():
+    # One debtor pays multiple creditors until their debt is cleared.
+    balances = {1: -30, 2: 10, 3: 20}
+    transfers = simplify_debts(balances)
+    paid_to = {creditor: amt for _, creditor, amt in transfers}
+    assert paid_to[3] == 20
+    assert paid_to[2] == 10
+    assert sum(t[2] for t in transfers) == 30

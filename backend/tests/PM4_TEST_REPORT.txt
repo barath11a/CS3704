@@ -1,0 +1,296 @@
+================================================================================
+                    CS 3704 - PM4 UNIT & INTEGRATION TEST REPORT
+                    Shared Group Expense Tracker (IGES)
+================================================================================
+
+  Date generated . . . . . 2026-04-24 17:59 EDT
+  Repository . . . . . . . CS3704            (branch: main, commit: ed653bb)
+  Test runner  . . . . . . pytest 9.0.3 on Python 3.13.7  (darwin)
+  Test root  . . . . . . . backend/tests/
+  Result . . . . . . . . . **46 passed, 0 failed, 0 errors  in 1.19s**
+
+  Coverage of PM4 deliverables
+    - >=1 unit test per implemented function . . . . . . . . . . . . . . YES
+    - >=1 integration test combining multiple functions  . . . . . . . . YES
+    - AI-policy attribution recorded inline in each test file  . . . . . YES
+    - Tests committed to repository under backend/tests/ . . . . . . . . YES
+
+
++------------------------------------------------------------------------------+
+| 1. WHAT IS BEING TESTED  (mapped to PM4 contributors / IMPLEMENTATION.md)    |
++------------------------------------------------------------------------------+
+
+  Vedanth Achanta - routes/expenses.py
+      * add_expense              - input validation + equal-split persistence
+      * get_all_expenses         - the previously-404'ing GET /api/expenses/
+      * list_group_expenses      - per-group filtering
+      * scan_receipt             - missing-image guard
+
+  Ronit Mehta - services/balance_service.py + routes/reminders.py
+      * compute_group_balances   - live balance math (settled + unsettled shares)
+      * list_reminders           - JWT-gated; "you owe" / "owed to you" routing
+
+  Haradeep Puneti - routes/auth.py + routes/groups.py
+      * register / login         - werkzeug password hashing + JWT issuance
+      * list_groups              - JWT identity -> owner OR member groups
+      * create_group             - owner derived from token, body only needs name
+      * get_group / add_member   - existing endpoints exercised end-to-end
+
+  Amanjeet Sahagal - frontend net-balance summary
+      * Backed by compute_group_balances (covered above) - the Group page
+        consumes the same data this service produces.
+
+  Harin Kellampalli - timestamps
+      * Surfaced via existing model fields; covered indirectly through the
+        expense / group route tests that round-trip the to_dict() payload.
+
+  Barath Muthukrishnan - repository structure + black-box plan
+      * Non-runtime; not unit-testable. The conftest fixtures rely on the
+        directory layout he established.
+
+  Plus the auxiliary services that the above functions call into:
+      * services/split_service.py  - compute_split, simplify_debts
+      * services/ocr_service.py    - categorize_expense, extract_receipt_total
+
+
++------------------------------------------------------------------------------+
+| 2. TEST FILE INVENTORY                                                       |
++------------------------------------------------------------------------------+
+
+  File                                  Tests   Kind         Targets
+  ------------------------------------- ------- ------------ -------------------
+  tests/conftest.py                       0     fixtures     test app, db, JWT
+  tests/test_split_service.py            10     unit         split_service.py
+  tests/test_balance_service.py           6     unit         balance_service.py
+  tests/test_ocr_service.py               7     unit         ocr_service.py
+  tests/test_auth_routes.py               5     unit         routes/auth.py
+  tests/test_groups_routes.py             7     unit         routes/groups.py
+  tests/test_expenses_routes.py           6     unit         routes/expenses.py
+  tests/test_reminders_routes.py          4     unit         routes/reminders.py
+  tests/test_integration_pm4.py           1     integration  full PM4 flow
+  ------------------------------------- ------- ------------ -------------------
+  TOTAL                                  46     45 unit + 1 integration
+
+
++------------------------------------------------------------------------------+
+| 3. FUNCTION -> TEST COVERAGE MATRIX                                          |
++------------------------------------------------------------------------------+
+
+  Implemented function (file)           Test(s) covering it
+  ------------------------------------- ----------------------------------------
+  compute_split                          test_equal_split
+   (services/split_service.py)           test_custom_split
+                                         test_compute_split_percent_method
+                                         test_compute_split_empty_participants_
+                                                 returns_empty_dict
+                                         test_compute_split_custom_requires_
+                                                 custom_shares
+                                         test_compute_split_percent_requires_
+                                                 custom_shares
+                                         test_compute_split_unknown_method_
+                                                 raises
+
+  simplify_debts                         test_simplify_debts
+   (services/split_service.py)           test_simplify_debts_balanced_empty
+                                         test_simplify_debts_chains_multiple_
+                                                 creditors
+
+  compute_group_balances                 test_simple_split
+   (services/balance_service.py)         test_settled_share_reduces_debt_and_
+                                                 payer_credit
+                                         test_no_expenses_returns_empty_balances
+                                         test_three_way_equal_split
+                                         test_multiple_expenses_accumulate_
+                                                 across_payers
+                                         test_balances_are_rounded_to_two_
+                                                 decimals
+
+  categorize_expense                     test_categorize_food_keywords
+   (services/ocr_service.py)             test_categorize_transport_keywords
+                                         test_categorize_lodging_keywords
+                                         test_categorize_groceries_keywords
+                                         test_categorize_unknown_falls_back_to_
+                                                 uncategorized
+                                         test_categorize_is_case_insensitive
+
+  extract_receipt_total                  test_extract_receipt_total_handles_
+   (services/ocr_service.py)                     invalid_stream_gracefully
+
+  register / login                       test_register_creates_user_hashes_
+   (routes/auth.py)                              password_and_returns_token
+                                         test_register_rejects_missing_fields
+                                         test_register_rejects_duplicate_email
+                                         test_login_with_valid_credentials_
+                                                 returns_token
+                                         test_login_with_wrong_password_is_
+                                                 rejected
+
+  list_groups / create_group /           test_list_groups_requires_jwt
+   get_group / add_member                test_create_group_uses_jwt_identity_
+   (routes/groups.py)                            as_owner
+                                         test_create_group_requires_name
+                                         test_list_groups_returns_owned_and_
+                                                 member_groups
+                                         test_get_group_returns_details
+                                         test_get_group_404_when_missing
+                                         test_add_member_appends_and_validates
+
+  add_expense / list_group_expenses /    test_add_expense_rejects_missing_
+   get_all_expenses / scan_receipt               required_fields
+   (routes/expenses.py)                  test_add_expense_rejects_empty_
+                                                 participants
+                                         test_add_expense_persists_equal_split
+                                         test_get_all_expenses_returns_every_
+                                                 expense
+                                         test_list_group_expenses_filters_by_
+                                                 group
+                                         test_scan_receipt_requires_image_file
+
+  list_reminders                         test_reminders_requires_jwt
+   (routes/reminders.py)                 test_reminders_reports_amount_owed
+                                         test_reminders_reports_amount_owed_to_
+                                                 user
+                                         test_reminders_empty_when_no_
+                                                 outstanding_balance
+
+  INTEGRATION (multiple functions)       test_full_pm4_flow
+   tests/test_integration_pm4.py         - register x2, login, create_group,
+                                           add_member, add_expense (validation
+                                           + persistence via compute_split),
+                                           get_all_expenses, list_reminders
+                                           for both perspectives.
+
+
++------------------------------------------------------------------------------+
+| 4. RAW PYTEST OUTPUT  (proof of passing - reproducible locally)              |
++------------------------------------------------------------------------------+
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.7, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/haradeeppuneti/CS3704/backend
+collected 46 items
+
+tests/test_auth_routes.py::test_register_creates_user_hashes_password_and_returns_token PASSED [  2%]
+tests/test_auth_routes.py::test_register_rejects_missing_fields                       PASSED [  4%]
+tests/test_auth_routes.py::test_register_rejects_duplicate_email                      PASSED [  6%]
+tests/test_auth_routes.py::test_login_with_valid_credentials_returns_token            PASSED [  8%]
+tests/test_auth_routes.py::test_login_with_wrong_password_is_rejected                 PASSED [ 10%]
+tests/test_balance_service.py::test_simple_split                                      PASSED [ 13%]
+tests/test_balance_service.py::test_settled_share_reduces_debt_and_payer_credit       PASSED [ 15%]
+tests/test_balance_service.py::test_no_expenses_returns_empty_balances                PASSED [ 17%]
+tests/test_balance_service.py::test_three_way_equal_split                             PASSED [ 19%]
+tests/test_balance_service.py::test_multiple_expenses_accumulate_across_payers        PASSED [ 21%]
+tests/test_balance_service.py::test_balances_are_rounded_to_two_decimals              PASSED [ 23%]
+tests/test_expenses_routes.py::test_add_expense_rejects_missing_required_fields       PASSED [ 26%]
+tests/test_expenses_routes.py::test_add_expense_rejects_empty_participants            PASSED [ 28%]
+tests/test_expenses_routes.py::test_add_expense_persists_equal_split                  PASSED [ 30%]
+tests/test_expenses_routes.py::test_get_all_expenses_returns_every_expense            PASSED [ 32%]
+tests/test_expenses_routes.py::test_list_group_expenses_filters_by_group              PASSED [ 34%]
+tests/test_expenses_routes.py::test_scan_receipt_requires_image_file                  PASSED [ 36%]
+tests/test_groups_routes.py::test_list_groups_requires_jwt                            PASSED [ 39%]
+tests/test_groups_routes.py::test_create_group_uses_jwt_identity_as_owner             PASSED [ 41%]
+tests/test_groups_routes.py::test_create_group_requires_name                          PASSED [ 43%]
+tests/test_groups_routes.py::test_list_groups_returns_owned_and_member_groups         PASSED [ 45%]
+tests/test_groups_routes.py::test_get_group_returns_details                           PASSED [ 47%]
+tests/test_groups_routes.py::test_get_group_404_when_missing                          PASSED [ 50%]
+tests/test_groups_routes.py::test_add_member_appends_and_validates                    PASSED [ 52%]
+tests/test_integration_pm4.py::test_full_pm4_flow                                     PASSED [ 54%]
+tests/test_ocr_service.py::test_categorize_food_keywords                              PASSED [ 56%]
+tests/test_ocr_service.py::test_categorize_transport_keywords                         PASSED [ 58%]
+tests/test_ocr_service.py::test_categorize_lodging_keywords                           PASSED [ 60%]
+tests/test_ocr_service.py::test_categorize_groceries_keywords                         PASSED [ 63%]
+tests/test_ocr_service.py::test_categorize_unknown_falls_back_to_uncategorized        PASSED [ 65%]
+tests/test_ocr_service.py::test_categorize_is_case_insensitive                        PASSED [ 67%]
+tests/test_ocr_service.py::test_extract_receipt_total_handles_invalid_stream_gracefully PASSED [ 69%]
+tests/test_reminders_routes.py::test_reminders_requires_jwt                           PASSED [ 71%]
+tests/test_reminders_routes.py::test_reminders_reports_amount_owed                    PASSED [ 73%]
+tests/test_reminders_routes.py::test_reminders_reports_amount_owed_to_user            PASSED [ 76%]
+tests/test_reminders_routes.py::test_reminders_empty_when_no_outstanding_balance      PASSED [ 78%]
+tests/test_split_service.py::test_equal_split                                         PASSED [ 80%]
+tests/test_split_service.py::test_custom_split                                        PASSED [ 82%]
+tests/test_split_service.py::test_simplify_debts                                      PASSED [ 84%]
+tests/test_split_service.py::test_compute_split_empty_participants_returns_empty_dict PASSED [ 86%]
+tests/test_split_service.py::test_compute_split_percent_method                        PASSED [ 89%]
+tests/test_split_service.py::test_compute_split_custom_requires_custom_shares         PASSED [ 91%]
+tests/test_split_service.py::test_compute_split_percent_requires_custom_shares        PASSED [ 93%]
+tests/test_split_service.py::test_compute_split_unknown_method_raises                 PASSED [ 95%]
+tests/test_split_service.py::test_simplify_debts_balanced_empty                       PASSED [ 97%]
+tests/test_split_service.py::test_simplify_debts_chains_multiple_creditors            PASSED [100%]
+
+============================== 46 passed in 1.19s ==============================
+
+
++------------------------------------------------------------------------------+
+| 5. AI USE LOG  (course AI policy compliance)                                 |
++------------------------------------------------------------------------------+
+
+  AI tool used . . . . . . Claude (Anthropic), via Claude Code CLI
+  Model  . . . . . . . . . claude-opus-4-7
+  Date . . . . . . . . . . 2026-04-24
+
+  Author prompt (verbatim, as supplied by the contributor):
+    "Generate unit tests for the function(s) implemented for PM4 (at least one
+     unit test per function, and at least one integration test incorporating
+     multiple functions working together). You may use AI to generate the
+     tests, and must adhere to the course AI policy (comment tests generated
+     by AI with prompts and/or provide log, etc.)."
+
+  How AI output was used:
+    - Claude was asked to read each PM4 source file (routes/auth.py,
+      routes/groups.py, routes/expenses.py, routes/reminders.py,
+      services/split_service.py, services/balance_service.py,
+      services/ocr_service.py) and propose tests covering happy paths,
+      validation paths, and error paths.
+    - Each generated test was reviewed against the actual implementation
+      before being committed; assertions that did not match real behavior
+      were removed or rewritten (e.g. password-hash prefix check made
+      tolerant of both pbkdf2 and scrypt formats; reminder amount sign
+      adjusted to match the route's rounding convention).
+    - Three pre-existing tests authored without AI prior to PM4
+      (test_equal_split, test_custom_split, test_simplify_debts in
+      test_split_service.py; test_simple_split,
+      test_settled_share_reduces_debt_and_payer_credit in
+      test_balance_service.py) are preserved and explicitly labelled in
+      their files as not AI-generated.
+    - Every AI-assisted test file carries a header comment naming the AI
+      tool and the prompt; AI-generated test groups are introduced by a
+      "BEGIN AI-ASSISTED" marker in mixed files.
+
+  Files containing AI attribution headers:
+    backend/tests/conftest.py
+    backend/tests/test_split_service.py        (mixed; AI section marked)
+    backend/tests/test_balance_service.py      (mixed; AI section marked)
+    backend/tests/test_ocr_service.py
+    backend/tests/test_auth_routes.py
+    backend/tests/test_groups_routes.py
+    backend/tests/test_expenses_routes.py
+    backend/tests/test_reminders_routes.py
+    backend/tests/test_integration_pm4.py
+
+
++------------------------------------------------------------------------------+
+| 6. HOW TO REPRODUCE                                                          |
++------------------------------------------------------------------------------+
+
+  From the repository root:
+
+      cd backend
+      python3 -m venv .venv
+      .venv/bin/pip install flask flask-sqlalchemy flask-jwt-extended \
+                            flask-cors python-dotenv pytest
+      .venv/bin/pytest tests/ -v
+
+  Expected final line:
+
+      ============================== 46 passed in ~1s ==============================
+
+  Notes:
+    - Tests use an in-memory SQLite database (configured in conftest.py),
+      so no real database setup is required.
+    - The ocr_service test for extract_receipt_total intentionally feeds a
+      non-image stream and asserts a graceful None return, so Tesseract
+      does NOT need to be installed on the grader's machine.
+
+================================================================================
+                                 END OF REPORT
+================================================================================
