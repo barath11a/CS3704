@@ -23,6 +23,11 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+function formatCategoryLabel(category) {
+  if (!category || category === "uncategorized") return "Uncategorized";
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
 function GroupView() {
   const { groupId } = useParams();
   const [user, setUser] = useState(readStoredUser);
@@ -144,6 +149,42 @@ function GroupView() {
         Net balance is calculated as what you paid for the group minus your
         shares of all group expenses.
       </p>
+      <div style={{ marginTop: "1.5rem" }}>
+        <h3>Expenses</h3>
+        {expenses.length === 0 ? (
+          <p>No expenses in this group yet.</p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {expenses.map((expense) => (
+              <li
+                key={expense.id}
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "baseline",
+                  gap: "0.5rem 1rem",
+                  padding: "0.6rem 0",
+                  borderBottom: "1px solid #e5e5e5",
+                }}
+              >
+                <span style={{ fontWeight: 600 }}>{expense.description}</span>
+                <span>{formatCurrency(Number(expense.amount))}</span>
+                <span
+                  style={{
+                    fontSize: "0.85rem",
+                    padding: "0.15rem 0.5rem",
+                    borderRadius: "999px",
+                    background: "#eef2ff",
+                    color: "#3730a3",
+                  }}
+                >
+                  {formatCategoryLabel(expense.category)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }

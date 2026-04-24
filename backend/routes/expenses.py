@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from models import db
 from models.expense import Expense, ExpenseShare
 from services.split_service import compute_split
-from services.ocr_service import extract_receipt_total
+from services.ocr_service import categorize_expense, extract_receipt_total
 
 expenses_bp = Blueprint("expenses", __name__)
 
@@ -28,11 +28,13 @@ def add_expense():
 
     shares = compute_split(amount, participants, split_method, custom_shares)
 
+    category = categorize_expense(str(description))
     expense = Expense(
         group_id=group_id,
         payer_id=payer_id,
         description=description,
         amount=amount,
+        category=category,
         split_method=split_method,
     )
     db.session.add(expense)
