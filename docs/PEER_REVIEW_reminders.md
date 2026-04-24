@@ -40,6 +40,11 @@ Overall this is a solid feature add. It spans the whole stack — a new backend 
 - `RemindersBanner` hardcodes `DISMISS_KEY = "iges_reminder_dismissed"` — probably should live with other storage keys in `services/api.js` next to `AUTH_TOKEN_KEY` so they're all in one place.
 - No docstrings on `list_reminders`. The function is small enough that it's obvious, but given this is a new public API endpoint, a one-line docstring describing the response shape would help.
 
+## AI-Specific Concerns
 
+The commit trailer says "Made-with: Cursor," so some of this was AI-assisted. It mostly looks fine. A couple small things I noticed that feel AI-generated: the backend loops through groups one by one to fetch expenses instead of using a single query, and the frontend dismiss key is a bit more general than the backend actually needs. Nothing broken, just the kind of thing a human reviewer would probably tighten up. Overall takeaway: AI is helpful for scaffolding, but worth re-reading for small efficiency and design choices.
 
+## Recommendation
+
+Return for minor changes. The feature works and the code is readable, but I'd want the N+1 query cleaned up and a short docstring on the new endpoint before merging. Not applying this — leaving the PR open for grading per the assignment.
 
