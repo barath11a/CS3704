@@ -3,26 +3,30 @@ platform win32 -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0 -- C:\Program Files\
 cachedir: .pytest_cache
 rootdir: C:\Users\barat\3114\check\Proj3\IntelligentGroupExpenseSplitter\backend
 plugins: anyio-4.12.0
-collecting ... collected 19 items
+collecting ... collected 23 items
 
-tests/test_balance_service.py::test_simple_split PASSED                  [  5%]
-tests/test_balance_service.py::test_settled_share_reduces_debt_and_payer_credit PASSED [ 10%]
-tests/test_split_service.py::test_equal_split PASSED                     [ 15%]
-tests/test_split_service.py::test_equal_split_rounds_to_two_decimals PASSED [ 21%]
-tests/test_split_service.py::test_custom_split PASSED                    [ 26%]
-tests/test_split_service.py::test_custom_split_missing_shares_raises PASSED [ 31%]
-tests/test_split_service.py::test_percent_split PASSED                   [ 36%]
-tests/test_split_service.py::test_percent_split_missing_shares_raises PASSED [ 42%]
-tests/test_split_service.py::test_unknown_method_raises PASSED           [ 47%]
+tests/test_balance_service.py::test_simple_split PASSED                  [  4%]
+tests/test_balance_service.py::test_settled_share_reduces_debt_and_payer_credit PASSED [  8%]
+tests/test_split_service.py::test_equal_split PASSED                     [ 13%]
+tests/test_split_service.py::test_equal_split_rounds_to_two_decimals PASSED [ 17%]
+tests/test_split_service.py::test_custom_split PASSED                    [ 21%]
+tests/test_split_service.py::test_custom_split_missing_shares_raises PASSED [ 26%]
+tests/test_split_service.py::test_percent_split PASSED                   [ 30%]
+tests/test_split_service.py::test_percent_split_missing_shares_raises PASSED [ 34%]
+tests/test_split_service.py::test_unknown_method_raises PASSED           [ 39%]
+tests/test_split_service.py::test_negative_amount_raises PASSED          [ 43%]
+tests/test_split_service.py::test_percent_shares_must_sum_to_100 PASSED  [ 47%]
 tests/test_split_service.py::test_empty_participants_returns_empty_dict PASSED [ 52%]
-tests/test_split_service.py::test_simplify_debts_conservation PASSED     [ 57%]
-tests/test_split_service.py::test_simplify_debts_single_creditor PASSED  [ 63%]
-tests/test_split_service.py::test_simplify_debts_balanced_ledger PASSED  [ 68%]
-tests/test_split_service.py::test_categorize_expense_food PASSED         [ 73%]
-tests/test_split_service.py::test_categorize_expense_transport PASSED    [ 78%]
-tests/test_split_service.py::test_categorize_expense_lodging PASSED      [ 84%]
-tests/test_split_service.py::test_categorize_expense_groceries PASSED    [ 89%]
-tests/test_split_service.py::test_categorize_expense_uncategorized PASSED [ 94%]
+tests/test_split_service.py::test_simplify_debts_conservation PASSED     [ 56%]
+tests/test_split_service.py::test_simplify_debts_single_creditor PASSED  [ 60%]
+tests/test_split_service.py::test_simplify_debts_balanced_ledger PASSED  [ 65%]
+tests/test_split_service.py::test_categorize_expense_food PASSED         [ 69%]
+tests/test_split_service.py::test_categorize_expense_transport PASSED    [ 73%]
+tests/test_split_service.py::test_categorize_expense_lodging PASSED      [ 78%]
+tests/test_split_service.py::test_categorize_expense_groceries PASSED    [ 82%]
+tests/test_split_service.py::test_categorize_expense_uncategorized PASSED [ 86%]
+tests/test_split_service.py::test_extract_receipt_total_ignores_subtotal PASSED [ 91%]
+tests/test_split_service.py::test_extract_receipt_total_subtotal_after_total PASSED [ 95%]
 tests/test_split_service.py::test_end_to_end_group_expense_flow PASSED   [100%]
 
-============================= 19 passed in 0.11s ==============================
+============================= 23 passed in 0.69s ==============================
