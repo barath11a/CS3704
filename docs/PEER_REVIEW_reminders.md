@@ -40,22 +40,6 @@ Overall this is a solid feature add. It spans the whole stack — a new backend 
 - `RemindersBanner` hardcodes `DISMISS_KEY = "iges_reminder_dismissed"` — probably should live with other storage keys in `services/api.js` next to `AUTH_TOKEN_KEY` so they're all in one place.
 - No docstrings on `list_reminders`. The function is small enough that it's obvious, but given this is a new public API endpoint, a one-line docstring describing the response shape would help.
 
-## AI-Specific Concerns
 
-Commit trailer says "Made-with: Cursor", so at least part of this was AI-assisted. A few things I noticed that feel AI-ish:
 
-- The N+1 query pattern (one `Expense.query` per group) is the kind of thing an LLM will happily emit because it looks correct at the unit level. A human reviewer catches it because they're thinking about scale. **Lesson:** don't trust AI for data-access patterns without reading the loop structure.
-- The frontend dismissal key format `${group_id}:${kind}` is slightly over-general for what the backend actually emits. Smells like the AI designed for a more general case than the backend supports.
-- On the positive side the test file is clean and uses `SimpleNamespace` mocking well — that's something I think AI does well, and it would have taken me longer to hand-write.
-- The commit message is terse ("added in-app reminders") — AI tools will usually suggest more descriptive messages if asked, so this was likely a human choice. Fine, but for a feature this size, a multi-line description would make future git-archaeology easier.
 
-**Takeaway for me:** AI is great at the scaffolding (routes, hooks, test harnesses) but tends to miss cross-cutting concerns like query performance and key-space design. Worth reviewing those manually every time.
-
-## Recommendation
-
-**Return for changes** (minor). Nothing here is wrong enough to close, and most of it works as-is for the PM4 scope, but I'd want at least:
-1. A fix for the N+1 query in `list_reminders` (single `Expense.query.filter(Expense.group_id.in_(group_ids))` and group in Python, or a join).
-2. A one-line docstring on the new public endpoint.
-3. Optional: clean up the double-write in `balance_service.py` when a share is settled.
-
-After those I'd be happy to merge. Per the assignment I am **not** actually applying a recommendation / merging — leaving the PR open for grading.
