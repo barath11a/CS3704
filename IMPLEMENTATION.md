@@ -66,19 +66,19 @@ This supports the PM3 security and web-first goals: hashed passwords and JWT aut
 Contributor: Amanjeet Sahagal
 
 What was implemented:
-I implemented the net balance summary on the group details page. The placeholder group view was replaced with a functional screen that loads the selected group, fetches its expenses, and shows the signed-in user's net balance along with the group name, member count, and expense count.
+I expanded the frontend substantially beyond the original placeholder screens. I redesigned the main app shell, improved the dashboard and login experience, and turned the group page into a functional workspace. The group view now shows the signed-in user's net balance, richer group summary cards, an expense history section, and a working expense entry form that supports equal, custom, and percentage splits. I also connected the receipt scan flow on the frontend so a scanned total can prefill the expense amount.
 
 AI Tool Used: Codex
 
-Prompt: "do net balance"
-"push it with good title"
+Prompt: "lets just get the frontend flushed out right now, its very basic"
+"can you add to implementation.md with what stuff we added and that it was done with AI"
 
 AI Explanation and Modification:
-Codex helped identify a clean feature that fit the existing codebase and then wired the frontend to use the existing group and expense APIs. I reviewed the implementation and kept the feature minimal by calculating net balance on the client side from `payer_id` and `shares`, using the authenticated user already stored in local storage, instead of expanding backend scope.
+Codex helped restructure the existing React pages into a more polished and complete interface while staying within the current backend API. It generated the new layout, styling, dashboard cards, auth screen improvements, and the expanded group page with expense creation and OCR-assisted amount entry. I reviewed the changes, kept them aligned with the current Flask routes and data shapes, and made sure the new UI worked without requiring backend redesign.
 
 How it related to overall design
 
-This supports the PM3 goal of real-time balance visibility for group members. Showing whether a user is owed money, owes money, or is settled up directly strengthens the core shared-expense workflow and makes the group page more aligned with the main purpose of the application.
+This supports several PM3 goals at once: real-time balance visibility, expense recording, receipt scanning support, and an overall web-first user experience. By making the frontend more complete and interactive, the application now better reflects the intended shared-expense workflow instead of exposing only minimal placeholder pages.
 
 Contributor: Harin Kellampalli
 

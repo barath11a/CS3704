@@ -24,10 +24,13 @@ export const authApi = {
 
 export const groupApi = {
   list: () => api.get("/groups"),
-  create: (name) => api.post("/groups", { name }),
+  create: (name, memberNames = []) =>
+    api.post("/groups", { name, member_names: memberNames }),
   get: (id) => api.get(`/groups/${id}`),
   addMember: (groupId, userId) =>
     api.post(`/groups/${groupId}/members`, { user_id: userId }),
+  addMembers: (groupId, memberNames) =>
+    api.post(`/groups/${groupId}/members`, { member_names: memberNames }),
 };
 
 export const expenseApi = {
