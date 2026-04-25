@@ -9,6 +9,9 @@ def compute_split(amount, participants, method="equal", custom_shares=None):
         "custom"  - use exact values from custom_shares
         "percent" - use percentages from custom_shares (values must sum to 100)
     """
+    if amount is None or float(amount) < 0:
+        raise ValueError("amount must be a non-negative number")
+
     if not participants:
         return {}
 
@@ -24,6 +27,11 @@ def compute_split(amount, participants, method="equal", custom_shares=None):
     if method == "percent":
         if not custom_shares:
             raise ValueError("custom_shares (percentages) required for percent split")
+        total_pct = sum(float(p) for p in custom_shares.values())
+        if abs(total_pct - 100.0) > 0.01:
+            raise ValueError(
+                f"percent shares must sum to 100 (got {total_pct})"
+            )
         return {
             int(uid): round(amount * float(pct) / 100.0, 2)
             for uid, pct in custom_shares.items()

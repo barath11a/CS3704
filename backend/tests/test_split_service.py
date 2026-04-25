@@ -23,7 +23,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from services.split_service import compute_split, simplify_debts
-from services.ocr_service import categorize_expense
+from services.ocr_service import categorize_expense, extract_receipt_total
 
 
 # ---------------------------------------------------------------------------
@@ -78,6 +78,20 @@ def test_unknown_method_raises():
         compute_split(50.00, [1, 2], method="bogus")
 
 
+def test_negative_amount_raises():
+    """Negative amount must raise ValueError regardless of method."""
+    with pytest.raises(ValueError):
+        compute_split(-5.00, [1, 2], method="equal")
+
+
+def test_percent_shares_must_sum_to_100():
+    """Percent split rejects percentages that don't sum to 100."""
+    with pytest.raises(ValueError):
+        compute_split(
+            100.00, [1, 2], method="percent", custom_shares={1: 60, 2: 30}
+        )
+
+
 def test_empty_participants_returns_empty_dict():
     """No participants means nothing to split."""
     assert compute_split(50.00, [], method="equal") == {}
@@ -127,6 +141,41 @@ def test_categorize_expense_groceries():
 
 def test_categorize_expense_uncategorized():
     assert categorize_expense("Random miscellaneous thing") == "uncategorized"
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: extract_receipt_total (regression for "Subtotal" collision)
+# ---------------------------------------------------------------------------
+
+def _make_fake_ocr(monkeypatch, text):
+    """Patch pytesseract + PIL.Image so extract_receipt_total returns `text`."""
+    import types
+    fake_pytesseract = types.SimpleNamespace(
+        image_to_string=lambda _img: text
+    )
+    fake_pil_image = types.SimpleNamespace(open=lambda _s: object())
+
+    import sys as _sys
+    monkeypatch.setitem(_sys.modules, "pytesseract", fake_pytesseract)
+
+    pil_pkg = types.ModuleType("PIL")
+    pil_pkg.Image = fake_pil_image
+    monkeypatch.setitem(_sys.modules, "PIL", pil_pkg)
+    monkeypatch.setitem(_sys.modules, "PIL.Image", fake_pil_image)
+
+
+def test_extract_receipt_total_ignores_subtotal(monkeypatch):
+    """Regression: 'Subtotal' lines must not be treated as the final total."""
+    receipt = "Item A 5.00\nItem B 5.00\nSubtotal  10.00\nTax 1.00\nTotal 11.00\n"
+    _make_fake_ocr(monkeypatch, receipt)
+    assert extract_receipt_total("dummy_stream") == 11.00
+
+
+def test_extract_receipt_total_subtotal_after_total(monkeypatch):
+    """Even if Subtotal appears AFTER Total in the OCR text, we still pick Total."""
+    receipt = "Total 11.00\nSubtotal 10.00\n"
+    _make_fake_ocr(monkeypatch, receipt)
+    assert extract_receipt_total("dummy_stream") == 11.00
 
 
 # ---------------------------------------------------------------------------

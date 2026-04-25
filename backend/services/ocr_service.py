@@ -20,10 +20,12 @@ def extract_receipt_total(image_stream):
     except Exception:
         return None
 
-    # Look for a line containing "total" and grab the last numeric value.
+    # Look for a line where "total" appears as a word on its own (i.e. not
+    # inside "subtotal"), then grab the last numeric value on that line.
     total = None
     for line in text.splitlines():
-        if "total" in line.lower():
+        lower = line.lower()
+        if re.search(r"\btotal\b", lower) and "subtotal" not in lower:
             matches = re.findall(r"\d+\.\d{2}", line)
             if matches:
                 total = float(matches[-1])
