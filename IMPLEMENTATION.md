@@ -66,19 +66,19 @@ This supports the PM3 security and web-first goals: hashed passwords and JWT aut
 Contributor: Amanjeet Sahagal
 
 What was implemented:
-I implemented the net balance summary on the group details page. The placeholder group view was replaced with a functional screen that loads the selected group, fetches its expenses, and shows the signed-in user's net balance along with the group name, member count, and expense count.
+I improved the frontend experience with a lightweight polish pass focused on the landing page and authentication flow. I updated the landing page layout, simplified the login and registration screen, and cleaned up the navigation so the app has a clearer first-use experience. I also kept the signed-in dashboard and group page intentionally basic, while still supporting core actions like creating groups, adding members by name, and adding simple equal-split expenses.
 
 AI Tool Used: Codex
 
-Prompt: "do net balance"
-"push it with good title"
+Prompt: "I also want to make this PR more lightweight, could it be possible to just add this landing page and login flow"
+"can you add to implementation.md with what stuff we added and that it was done with AI"
 
 AI Explanation and Modification:
-Codex helped identify a clean feature that fit the existing codebase and then wired the frontend to use the existing group and expense APIs. I reviewed the implementation and kept the feature minimal by calculating net balance on the client side from `payer_id` and `shares`, using the authenticated user already stored in local storage, instead of expanding backend scope.
+Codex helped rework the existing React pages into a cleaner and more focused UI while keeping the scope appropriate for a single PR. It generated the updated landing page, the simpler login/register flow, consistent spacing and navigation styling, and basic logged-in pages that still connect to the existing group and expense APIs. I reviewed the changes and kept the implementation aligned with the current Flask backend, including support for adding members by name instead of relying on raw IDs in the UI.
 
 How it related to overall design
 
-This supports the PM3 goal of real-time balance visibility for group members. Showing whether a user is owed money, owes money, or is settled up directly strengthens the core shared-expense workflow and makes the group page more aligned with the main purpose of the application.
+This supports the PM3 web-first goals by making the application easier to approach and use from the start, especially for new users entering through the landing page and login flow. It also keeps the rest of the product in a workable baseline state so additional group and expense features can still be built incrementally by other teammates.
 
 Contributor: Harin Kellampalli
 

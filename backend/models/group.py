@@ -20,6 +20,7 @@ class Group(db.Model):
             "name": self.name,
             "owner_id": self.owner_id,
             "members": [m.user_id for m in self.members],
+            "member_details": [m.to_dict() for m in self.members],
         }
 
 
@@ -30,3 +31,11 @@ class GroupMember(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User")
+
+    def to_dict(self):
+        return {
+            "id": self.user_id,
+            "name": self.user.name if self.user else f"User {self.user_id}",
+        }

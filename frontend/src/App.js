@@ -3,25 +3,40 @@ import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom"
 import Dashboard from "./pages/Dashboard";
 import GroupView from "./pages/GroupView";
 import Login from "./pages/Login";
-import RemindersBanner from "./components/RemindersBanner";
 import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "./services/api";
+
+function readStoredUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 function NavAuth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [loggedIn, setLoggedIn] = useState(
-    () => !!localStorage.getItem(AUTH_TOKEN_KEY)
-  );
+  const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem(AUTH_TOKEN_KEY));
+  const [user, setUser] = useState(readStoredUser);
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem(AUTH_TOKEN_KEY));
+    setUser(readStoredUser());
   }, [location.pathname]);
 
   useEffect(() => {
-    const onStorage = () =>
+    const sync = () => {
       setLoggedIn(!!localStorage.getItem(AUTH_TOKEN_KEY));
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+      setUser(readStoredUser());
+    };
+
+    window.addEventListener("storage", sync);
+    window.addEventListener("iges-auth-change", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("iges-auth-change", sync);
+    };
   }, []);
 
   const logout = () => {
@@ -33,35 +48,57 @@ function NavAuth() {
   };
 
   return (
-    <>
-      <Link to="/">Dashboard</Link>
-      {" | "}
-      {loggedIn ? (
-        <button type="button" onClick={logout}>
-          Log out
-        </button>
+    <div className="nav-auth">
+      <Link className="button button-secondary" to="/">
+        Home
+      </Link>
+      {loggedIn && user ? (
+        <>
+          <span className="session-box">{user.name}</span>
+          <button className="button button-secondary" type="button" onClick={logout}>
+            Log out
+          </button>
+        </>
       ) : (
-        <Link to="/login">Login</Link>
+        <>
+          <Link className="button button-secondary" to="/login">
+            Sign in
+          </Link>
+          <Link className="button button-primary" to="/login?mode=register">
+            Sign up
+          </Link>
+        </>
       )}
-    </>
+    </div>
   );
 }
 
 function App() {
   return (
-    <div className="container">
-      <header>
-        <h1>Intelligent Group Expense Splitter</h1>
-        <nav>
-          <NavAuth />
-        </nav>
-      </header>
-      <RemindersBanner />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/groups/:groupId" element={<GroupView />} />
-      </Routes>
+    <div className="app-shell">
+      <div className="container">
+        <header className="site-header">
+          <div className="site-brand">
+            <Link className="brand-link" to="/">
+              IGES
+            </Link>
+            <div>
+              <h1 className="site-title">Intelligent Group Expense Splitter</h1>
+              <p className="site-summary">Shared expenses made easy.</p>
+            </div>
+          </div>
+          <nav className="top-nav" aria-label="Primary">
+            <NavAuth />
+          </nav>
+        </header>
+        <main className="route-shell">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/groups/:groupId" element={<GroupView />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }
