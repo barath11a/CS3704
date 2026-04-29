@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from models import db
 from models.expense import Expense, ExpenseShare
 from services.split_service import compute_split
-from services.ocr_service import extract_receipt_total
+from services.ocr_service import extract_receipt_total, categorize_expense
 
 expenses_bp = Blueprint("expenses", __name__)
 
@@ -28,12 +28,15 @@ def add_expense():
 
     shares = compute_split(amount, participants, split_method, custom_shares)
 
+    category = data.get("category") or categorize_expense(description)
+
     expense = Expense(
         group_id=group_id,
         payer_id=payer_id,
         description=description,
         amount=amount,
         split_method=split_method,
+        category=category,
     )
     db.session.add(expense)
     db.session.flush()
@@ -51,7 +54,16 @@ def scan_receipt():
         return jsonify({"error": "image file required"}), 400
     image = request.files["image"]
     total = extract_receipt_total(image.stream)
-    return jsonify({"detected_total": total})
+    description_hint = request.form.get("description", "")
+    suggested_category = (
+        categorize_expense(description_hint) if description_hint else None
+    )
+    return jsonify(
+        {
+            "detected_total": total,
+            "suggested_category": suggested_category,
+        }
+    )
 
 
 @expenses_bp.route("/group/<int:group_id>", methods=["GET"])

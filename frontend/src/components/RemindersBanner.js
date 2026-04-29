@@ -73,20 +73,20 @@ function RemindersBanner() {
   }, [items, dismissed]);
 
   if (!tokenPresent) return null;
-
-  if (error && visible.length === 0 && !loading) {
-    return null;
-  }
-
-  if (visible.length === 0 && !loading) {
-    return null;
-  }
+  if (error && visible.length === 0 && !loading) return null;
+  if (visible.length === 0 && !loading) return null;
 
   return (
     <aside className="reminders-banner" aria-label="Balance reminders">
-      <h2 className="reminders-heading">Reminders</h2>
+      <div className="reminders-head">
+        <span className="reminders-badge">
+          <span aria-hidden>●</span> Reminders
+        </span>
+        <h2 className="reminders-heading">A few balances to settle</h2>
+      </div>
       <p className="reminders-sub">
-        Friendly nudges based on your current balances in each group.
+        Friendly nudges based on your current balances in each group. Dismiss any
+        you&apos;ve already handled.
       </p>
       {loading && visible.length === 0 ? (
         <p className="reminders-muted">Loading reminders…</p>
@@ -98,12 +98,15 @@ function RemindersBanner() {
             r.kind === "you_owe" ? "reminder-owe" : "reminder-credit";
           return (
             <li key={dkey} className={`reminder-card ${kindClass}`}>
-              <p className="reminder-message">{r.message}</p>
-              <div className="reminder-actions">
-                <Link to={`/groups/${r.group_id}`}>Open group</Link>
-                <button type="button" onClick={() => dismissOne(dkey)}>
-                  Dismiss
-                </button>
+              <span className="reminder-dot" aria-hidden />
+              <div className="reminder-body">
+                <p className="reminder-message">{r.message}</p>
+                <div className="reminder-actions">
+                  <Link to={`/groups/${r.group_id}`}>Open group →</Link>
+                  <button type="button" onClick={() => dismissOne(dkey)}>
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </li>
           );

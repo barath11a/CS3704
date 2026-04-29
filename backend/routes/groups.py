@@ -4,6 +4,7 @@ from sqlalchemy import or_
 
 from models import db
 from models.group import Group, GroupMember
+from models.user import User
 
 groups_bp = Blueprint("groups", __name__)
 
@@ -51,10 +52,28 @@ def get_group(group_id):
 def add_member(group_id):
     data = request.get_json() or {}
     user_id = data.get("user_id")
-    if not user_id:
-        return jsonify({"error": "user_id required"}), 400
+    email = (data.get("email") or "").strip().lower()
+
+    if not user_id and not email:
+        return jsonify({"error": "user_id or email required"}), 400
 
     Group.query.get_or_404(group_id)
-    db.session.add(GroupMember(group_id=group_id, user_id=user_id))
+
+    user = None
+    if user_id:
+        user = User.query.get(user_id)
+    elif email:
+        user = User.query.filter(db.func.lower(User.email) == email).first()
+
+    if not user:
+        return jsonify({"error": "no user found with that email"}), 404
+
+    existing = GroupMember.query.filter_by(
+        group_id=group_id, user_id=user.id
+    ).first()
+    if existing:
+        return jsonify({"error": "user is already a member"}), 409
+
+    db.session.add(GroupMember(group_id=group_id, user_id=user.id))
     db.session.commit()
-    return jsonify({"status": "added"}), 201
+    return jsonify({"status": "added", "user": user.to_dict()}), 201

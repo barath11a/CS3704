@@ -28,6 +28,8 @@ export const groupApi = {
   get: (id) => api.get(`/groups/${id}`),
   addMember: (groupId, userId) =>
     api.post(`/groups/${groupId}/members`, { user_id: userId }),
+  inviteByEmail: (groupId, email) =>
+    api.post(`/groups/${groupId}/members`, { email }),
 };
 
 export const expenseApi = {

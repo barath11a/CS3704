@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Landing from "./Landing";
 import {
   groupApi,
   AUTH_TOKEN_KEY,
@@ -13,6 +14,12 @@ function readStoredUser() {
   } catch {
     return null;
   }
+}
+
+function initials(name) {
+  if (!name) return "·";
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]).join("").toUpperCase();
 }
 
 function Dashboard() {
@@ -72,45 +79,63 @@ function Dashboard() {
   };
 
   if (!user) {
-    return (
-      <section>
-        <h2>Your Groups</h2>
-        <p>
-          <Link to="/login">Sign in</Link> to see your groups and create new
-          ones.
-        </p>
-      </section>
-    );
+    return <Landing />;
   }
 
   return (
     <section>
-      <h2>Your Groups</h2>
-      <p>
-        Signed in as {user.name} ({user.email})
-      </p>
-      <form onSubmit={createGroup}>
-        <label htmlFor="new-group-name">New group name</label>
+      <div className="page-head">
+        <div>
+          <div className="section-eyebrow">Your account</div>
+          <h1>Welcome back, {user.name?.split(" ")[0] || "friend"}.</h1>
+          <p>Signed in as {user.email}</p>
+        </div>
+      </div>
+
+      <form className="create-bar" onSubmit={createGroup}>
         <input
           id="new-group-name"
+          aria-label="New group name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder="e.g. Spring break trip"
+          placeholder="Name a new group — e.g. Spring break trip"
         />
-        <button type="submit">+ New Group</button>
+        <button type="submit" className="btn btn-accent">
+          + New group
+        </button>
       </form>
-      {error ? <p role="alert">{error}</p> : null}
-      {loading && groups.length === 0 ? <p>Loading…</p> : null}
+
+      {error ? (
+        <div className="alert alert-error" role="alert">
+          {error}
+        </div>
+      ) : null}
+
+      {loading && groups.length === 0 ? (
+        <p className="subtle" style={{ marginTop: 18 }}>
+          Loading your groups…
+        </p>
+      ) : null}
+
       {!loading && groups.length === 0 ? (
-        <p>No groups yet. Create one above to start tracking shared expenses.</p>
+        <div className="empty">
+          No groups yet. Create one above to start tracking shared expenses.
+        </div>
       ) : (
-        <ul>
+        <div className="group-grid">
           {groups.map((g) => (
-            <li key={g.id}>
-              <Link to={`/groups/${g.id}`}>{g.name}</Link>
-            </li>
+            <Link key={g.id} to={`/groups/${g.id}`} className="group-card">
+              <div className="gc-row">
+                <h3>{g.name}</h3>
+                <span className="gc-mark">{initials(g.name)}</span>
+              </div>
+              <div className="gc-meta">
+                {(g.members?.length || 0)} member
+                {(g.members?.length || 0) === 1 ? "" : "s"}
+              </div>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </section>
   );

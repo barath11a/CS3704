@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import GroupView from "./pages/GroupView";
 import Login from "./pages/Login";
@@ -33,35 +33,51 @@ function NavAuth() {
   };
 
   return (
-    <>
-      <Link to="/">Dashboard</Link>
-      {" | "}
+    <nav className="nav-links">
+      <NavLink to="/">Dashboard</NavLink>
       {loggedIn ? (
-        <button type="button" onClick={logout}>
+        <button type="button" className="nav-cta" onClick={logout}>
           Log out
         </button>
       ) : (
-        <Link to="/login">Login</Link>
+        <NavLink to="/login" className="nav-cta">
+          Sign in
+        </NavLink>
       )}
-    </>
+    </nav>
   );
 }
 
 function App() {
   return (
-    <div className="container">
-      <header>
-        <h1>Intelligent Group Expense Splitter</h1>
-        <nav>
+    <div className="app-shell">
+      <header className="site-header">
+        <div className="site-header-inner">
+          <Link to="/" className="brand">
+            <span className="brand-mark">i</span>
+            <span className="brand-name">IGES</span>
+            <span className="brand-tag">expense splitter</span>
+          </Link>
+          <span className="nav-spacer" />
           <NavAuth />
-        </nav>
+        </div>
       </header>
-      <RemindersBanner />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/groups/:groupId" element={<GroupView />} />
-      </Routes>
+
+      <main className="page">
+        <RemindersBanner />
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/groups/:groupId" element={<GroupView />} />
+        </Routes>
+      </main>
+
+      <footer className="site-footer">
+        <div className="site-footer-inner">
+          <span>IGES — Intelligent Group Expense Splitter</span>
+          <span>Built by Team 4 · CS3704</span>
+        </div>
+      </footer>
     </div>
   );
 }
