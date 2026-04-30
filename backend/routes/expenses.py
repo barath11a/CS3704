@@ -75,3 +75,13 @@ def list_group_expenses(group_id):
 def get_all_expenses():
     items = Expense.query.all()
     return jsonify([e.to_dict() for e in items])
+
+
+@expenses_bp.route("/<int:expense_id>", methods=["DELETE"])
+def delete_expense(expense_id):
+    expense = Expense.query.get(expense_id)
+    if not expense:
+        return jsonify({"error": "expense not found"}), 404
+    db.session.delete(expense)
+    db.session.commit()
+    return jsonify({"status": "deleted", "id": expense_id})

@@ -33,8 +33,9 @@ export const groupApi = {
 };
 
 export const expenseApi = {
-  add: (payload) => api.post("/expenses", payload),
+  add: (payload) => api.post("/expenses/", payload),
   listForGroup: (groupId) => api.get(`/expenses/group/${groupId}`),
+  remove: (expenseId) => api.delete(`/expenses/${expenseId}`),
   scanReceipt: (file) => {
     const form = new FormData();
     form.append("image", file);
